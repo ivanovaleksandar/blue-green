@@ -1,18 +1,62 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
+apiVersion: v1
+kind: Service
 metadata:
   name: green-deploy
+  labels:
+    name: green-deploy
+    version: 0.1.0
+    deployment: green
 spec:
-  chart:
-    git: git@github.com:ivanovaleksandar/blue-green
-    ref: master
-    path: chart
-  interval: 1m
-  install:
-    remediation:
-      retries: 3
-  values:
-    image:
-      repository: eu.gcr.io/blue-green-project/blue-green-app
-      tag: 0.1.0
-    deploymemt: green
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    name: green-deploy
+    version: 0.1.0
+    deployment: green
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green-deploy
+  labels:
+    name: green-deploy
+    version: 0.1.0
+    deployment: green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: green-deploy
+      version: 0.1.0
+      deployment: green
+  template:
+    metadata:
+      labels:
+        name: green-deploy
+        version: 0.1.0
+        deployment: green
+    spec:
+      serviceAccountName: green-deploy
+      containers:
+        - name: blue-green-app
+          image: "eu.gcr.io/blue-green-project/blue-green-app:0.1.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DEPLOYMENT
+              value: green
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
