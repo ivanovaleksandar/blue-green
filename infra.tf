@@ -50,6 +50,10 @@ resource "google_container_cluster" "gke" {
 
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
+
+  node_config {
+    machine_type = "n2-standard-2"
+  }
 }
 
 provider "kubernetes" {
@@ -62,8 +66,6 @@ provider "helm" {
   kubernetes {
     host  = "https://${google_container_cluster.gke.endpoint}"
     token = data.google_client_config.default.access_token
-    # client_certificate     = data.template_file.client_certificate.rendered
-    # client_key             = data.template_file.client_key.rendered
     cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
   }
 }
@@ -93,42 +95,49 @@ resource "helm_release" "nginx" {
 
 }
 
-resource "kubernetes_namespace" "flux" {
-  metadata {
-    name = "flux"
-  }
+# resource "helm_release" "flux" {
+#   name       = "flux"
+#   repository = "https://charts.fluxcd.io"
+#   chart      = "flux"
+#   version    = "1.11.2"
+#   namespace  = kubernetes_namespace.flux.metadata[0].name
+
+#   set {
+#     name  = "git.url"
+#     value = var.git_repo
+#   }
+#   set {
+#     name  = "git.readonly"
+#     value = true
+#   }
+# }
+
+# resource "helm_release" "helm_operator" {
+#   name       = "helm-operator"
+#   repository = "https://charts.fluxcd.io"
+#   chart      = "helm-operator"
+#   version    = "1.4.0"
+#   namespace  = kubernetes_namespace.flux.metadata[0].name
+
+#   set {
+#     name  = "createCRD"
+#     value = true
+#   }
+#   set {
+#     name  = "helm.versions"
+#     value = "v3"
+#   }
+# }
+
+
+# output "kubeconfig_path" {
+#   value = local_file.kubeconfig.filename
+# }
+
+output "location" {
+  value = "${var.region}-${var.zone}"
 }
 
-resource "helm_release" "flux" {
-  name       = "flux"
-  repository = "https://charts.fluxcd.io"
-  chart      = "flux"
-  version    = "1.11.2"
-  namespace  = kubernetes_namespace.flux.metadata[0].name
-
-  set {
-    name  = "git.url"
-    value = "git@github.com:${var.git_repo}"
-  }
-}
-
-resource "helm_release" "helm_operator" {
-  name       = "helm-operator"
-  repository = "https://charts.fluxcd.io"
-  chart      = "helm-operator"
-  version    = "1.4.0"
-  namespace  = kubernetes_namespace.flux.metadata[0].name
-
-  set {
-    name  = "createCRD"
-    value = false
-  }
-  set {
-    name  = "helm.versions"
-    value = "v3"
-  }
-  set {
-    name  = "git.ssh.secretName"
-    value = "flux-git-deploy"
-  }
+output "gke_name" {
+  value = google_container_cluster.gke.name
 }
