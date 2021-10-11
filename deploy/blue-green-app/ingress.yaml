@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
   name: blue-green
 spec:
   rules:
@@ -17,7 +16,4 @@ spec:
                 name: green-deploy
                 port: 
                   number: 80
-  # tls:
-  #   - hosts:
-  #     - elasticsearch-hermes.prod.fugamedia.com
-  #     secretName: elasticsearch-hermes-tls
+
