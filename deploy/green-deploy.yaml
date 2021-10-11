@@ -40,7 +40,6 @@ spec:
         version: 0.1.0
         deployment: green
     spec:
-      serviceAccountName: green-deploy
       containers:
         - name: blue-green-app
           image: "eu.gcr.io/blue-green-project/blue-green-app:0.1.0"
