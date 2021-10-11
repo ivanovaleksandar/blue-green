@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  name: blue-green
+spec:
+  rules:
+    - host: blue-green.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blue-deploy
+                port: 
+                  number: 80
+  # tls:
+  #   - hosts:
+  #     - elasticsearch-hermes.prod.fugamedia.com
+  #     secretName: elasticsearch-hermes-tls
