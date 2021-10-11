@@ -31,6 +31,13 @@ variable "zone" {
 }
 
 data "google_client_config" "default" {}
+data "google_project" "project" {}
+
+resource "google_storage_bucket_iam_member" "registry" {
+  bucket = "eu.artifacts.${var.project_id}.appspot.com"
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
 
 resource "google_compute_network" "vpc" {
   name                    = "${var.project_id}-vpc"
@@ -56,85 +63,37 @@ resource "google_container_cluster" "gke" {
 
   node_config {
     machine_type = "n2-standard-2"
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
   }
 }
 
-provider "kubernetes" {
-  host                   = "https://${google_container_cluster.gke.endpoint}"
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = "https://${google_container_cluster.gke.endpoint}"
-    token                  = data.google_client_config.default.access_token
-    cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
-  }
-}
 
 resource "google_compute_address" "regional_lb_ip" {
   name   = "lb"
   region = var.region
 }
 
-resource "kubernetes_namespace" "nginx" {
-  metadata {
-    name = "nginx"
-  }
-}
-
-resource "helm_release" "nginx" {
-  name       = "nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = "4.0.5"
-  namespace  = kubernetes_namespace.nginx.metadata[0].name
-
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = google_compute_address.regional_lb_ip.address
-  }
-
-}
-
-# resource "helm_release" "flux" {
-#   name       = "flux"
-#   repository = "https://charts.fluxcd.io"
-#   chart      = "flux"
-#   version    = "1.11.2"
-#   namespace  = kubernetes_namespace.flux.metadata[0].name
-
-#   set {
-#     name  = "git.url"
-#     value = var.git_repo
-#   }
-#   set {
-#     name  = "git.readonly"
-#     value = true
+# resource "kubernetes_namespace" "nginx" {
+#   metadata {
+#     name = "nginx"
 #   }
 # }
 
-# resource "helm_release" "helm_operator" {
-#   name       = "helm-operator"
-#   repository = "https://charts.fluxcd.io"
-#   chart      = "helm-operator"
-#   version    = "1.4.0"
-#   namespace  = kubernetes_namespace.flux.metadata[0].name
+# resource "helm_release" "nginx" {
+#   name       = "nginx"
+#   repository = "https://kubernetes.github.io/ingress-nginx"
+#   chart      = "ingress-nginx"
+#   version    = "4.0.5"
+#   namespace  = kubernetes_namespace.nginx.metadata[0].name
 
 #   set {
-#     name  = "createCRD"
-#     value = true
+#     name  = "controller.service.loadBalancerIP"
+#     value = google_compute_address.regional_lb_ip.address
 #   }
-#   set {
-#     name  = "helm.versions"
-#     value = "v3"
-#   }
-# }
 
-
-# output "kubeconfig_path" {
-#   value = local_file.kubeconfig.filename
+#   depends_on = [google_container_cluster.gke]
 # }
 
 output "location" {
@@ -143,4 +102,8 @@ output "location" {
 
 output "gke_name" {
   value = google_container_cluster.gke.name
+}
+
+output "lb_address" {
+  value = google_compute_address.regional_lb_ip.address
 }
