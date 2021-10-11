@@ -12,4 +12,7 @@ spec:
     remediation:
       retries: 3
   values:
+    image:
+      repository: eu.gcr.io/blue-green-project/blue-green-app
+      tag: 0.1.0
     deploymemt: green

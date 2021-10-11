@@ -23,9 +23,12 @@ provider "google" {
 }
 
 variable "project_id" {}
-variable "region" {}
-variable "zone" {}
-variable "git_repo" {}
+variable "region" {
+  default = "europe-west4"
+}
+variable "zone" {
+  default = "a"
+}
 
 data "google_client_config" "default" {}
 
@@ -64,8 +67,8 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes {
-    host  = "https://${google_container_cluster.gke.endpoint}"
-    token = data.google_client_config.default.access_token
+    host                   = "https://${google_container_cluster.gke.endpoint}"
+    token                  = data.google_client_config.default.access_token
     cluster_ca_certificate = base64decode(google_container_cluster.gke.master_auth[0].cluster_ca_certificate)
   }
 }
