@@ -46,10 +46,10 @@ docker-push:
 docker: docker-build docker-push
 
 docker-tag-blue:
-	cd deploy/blue-app && kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
+	cd deploy/blue-app && kustomize edit set image blue-green-app=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
 
 docker-tag-green:
-	cd deploy/green-app && kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
+	cd deploy/green-app && kustomize edit set image blue-green-app=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
 
 docker-tag-all: docker-tag-blue docker-tag-green
 

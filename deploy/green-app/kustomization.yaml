@@ -5,6 +5,6 @@ namespace: default
 resources:
 - green-deploy.yaml
 images:
-- name: blue-green
+- name: blue-green-app
   newName: eu.gcr.io/blue-green-project-12345/blue-green-app
   newTag: 0.1.0
