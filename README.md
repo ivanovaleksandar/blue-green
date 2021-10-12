@@ -23,7 +23,7 @@ First, fork and then clone this repository.
 
 Make sure you change these variables in the before continuing.
 
-```
+```bash
 export GITHUB_USER=gh-user # Your GitHub username
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxx # Your Personal GitHub Access Token
 export PROJECT_ID=blue-green-project-123456 # A Globally unique name for the GCP project 
@@ -31,13 +31,13 @@ export GCP_BILLING_ACCOUNT=0X0X0X-0X0X0X-0X0X0X # A GCP Billing account for enab
 ```
 
 Also, login to GCP:
-```
+```bash
 gcloud auth login
 gcloud auth application-default login
 ```
 
 Now, just execute: 
-```
+```bash
 make
 ```
 
@@ -52,14 +52,14 @@ This should perform the following actions:
 Some changes were done in your local repository. Now, commit all these changes and push them to master. This will trigger FLux to sync the new changes and apply them in the cluster.
 
 You can confirm that everything is working:
-```
+```bash
 make test
 ```
 
 ## Switching route 
 
 As we can see, testing the endpoint shows us that we are currently viewing the blue deployment. To start pointing to the green deployment, we need to update the route in the kubernetes ingress resource in `deploy/ingress.yaml`, from:
-```
+```yaml
 .....
 backend:
     service:
@@ -69,7 +69,7 @@ backend:
 .....
 ```
 to this:
-```
+```yaml
 .....
 backend:
     service:
@@ -82,7 +82,7 @@ backend:
 Commit the newly made changes and push to master. Flux will take a moment before it synchornizes the new changes.
 
 Now, confirm that we are pointing to the green deployment:
-```
+```bash
 make test
 ```
 
@@ -91,12 +91,12 @@ make test
 Now that we are pointing to the green deployment, we can introduce changes to the app and deploy them in the blue deployment. This way, we are making sure that no incomming traffic is affected by it. These changes will have an impact only when we switch the ingress resource to point again to the blue deployment.
 
 Ok, lets first introduce change is the app:
-```
+```bash
 sed -i -e 's/This is the %s deployment/Hello, this is the %s deployment/g' main.go
 ```
 
 Create a new image with a new tag and push it:
-```
+```bash
 export TAG=0.2.0
 make docker
 make docker-tag-blue
@@ -106,7 +106,7 @@ Commit and push the changes.
 
 Testing the endpoint with `make test` shows us that even though we created a new image and updated the blue deployment, the changes are still not visible. As we mentioned previously, the changes will only have an effect when we swithc the ingress resource to point to the new blue deployment.
 
-```
+```yaml
 .....
 backend:
     service:
@@ -116,7 +116,7 @@ backend:
 .....
 ```
 to this:
-```
+```yaml
 .....
 backend:
     service:
@@ -129,7 +129,7 @@ backend:
 Commit and push the changes. Wait few moments for Flux to syncronize the changes. 
 
 Confirm that it works:
-```
+```bash
 make test
 ```
 
@@ -138,6 +138,6 @@ Congrats. That should be it. You have successfully went through the blue green t
 ## Delete everything
 
 After you tested everything, you can destroy the project (and make sure you are not charged anymore)
-```
+```bash
 make destroy
 ```
