@@ -92,7 +92,7 @@ Now that we are pointing to the green deployment, we can introduce changes to th
 
 Ok, lets first introduce change is the app:
 ```bash
-sed -i -e 's/This is the %s deployment/Hello, this is the %s deployment/g' main.go
+sed -i '' -e 's/This is the %s deployment/Hello, this is the %s deployment/g' main.go
 ```
 
 Create a new image with a new tag and push it:
