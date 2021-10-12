@@ -60,7 +60,7 @@ kubernetes-creds:
 	gcloud container clusters get-credentials ${GKE_NAME} --region ${GKE_LOCATION} --project ${PROJECT_ID}
 
 flux-install:
-	flux bootstrap github --owner=${GITHUB_USER} --repository=${REPO_NAME} --path=./deploy --branch=master --personal
+	flux bootstrap github --owner=${GITHUB_USER} --repository=${REPO_NAME} --path=./deploy --branch=master --interval=10s --personal
 
 test: 
 	curl --header "Host: blue-green.example.com" http://${LB_IP}
