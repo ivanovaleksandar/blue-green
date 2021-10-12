@@ -16,3 +16,5 @@ spec:
     controller:
       service:
         loadBalancerIP: 35.204.90.50
+      admissionWebhooks:
+        enabled: false
