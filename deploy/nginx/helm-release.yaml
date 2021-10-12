@@ -14,5 +14,7 @@ spec:
   interval: 1m0s
   values:
     controller:
+      service:
+        loadBalancerIP: 34.147.64.7
       admissionWebhooks:
         enabled: false

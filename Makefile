@@ -4,7 +4,7 @@ GKE_NAME     ?= $(shell terraform output -raw gke_name)
 GKE_LOCATION ?= $(shell terraform output -raw location)
 LB_IP        ?= $(shell terraform output -raw lb_address)
 
-all: gcp terraform docker docker-tag-all kubernetes-creds flux-install
+all: gcp terraform docker docker-tag-all kubernetes-creds nginx-patch flux-install
 
 gcp-auth:
 	gcloud auth login
@@ -52,6 +52,9 @@ docker-tag-green:
 	cd deploy/green-app && kustomize edit set image blue-green-app=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
 
 docker-tag-all: docker-tag-blue docker-tag-green
+
+nginx-patch:
+	sed -i '' -e "s/loadBalancerIP:.*/loadBalancerIP: ${LB_IP}/" deploy/nginx/helm-release.yaml
 
 kubernetes-creds:
 	gcloud container clusters get-credentials ${GKE_NAME} --region ${GKE_LOCATION} --project ${PROJECT_ID}
