@@ -4,6 +4,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
   name: blue-green
+  namespace: default
 spec:
   rules:
     - host: blue-green.example.com

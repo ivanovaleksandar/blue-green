@@ -19,17 +19,17 @@ gcp-set-project:
 gcp-billing:
 	gcloud alpha billing accounts list
 	gcloud alpha billing projects link ${PROJECT_ID} --billing-account ${GCP_BILLING_ACCOUNT}
-	gcloud services enable compute.googleapis.com container.googleapis.com
+	gcloud services enable compute.googleapis.com container.googleapis.com artifactregistry.googleapis.com
 
 gcp: gcp-project gcp-set-project gcp-billing
 
 terraform-init:
 	terraform init
 
-terrorm-plan:
+terraform-plan:
 	terraform plan -var "project_id=${PROJECT_ID}"
 
-terrorm-apply:
+terraform-apply:
 	terraform apply -var "project_id=${PROJECT_ID}" -auto-approve
 
 terraform-destroy:
@@ -46,12 +46,10 @@ docker-push:
 docker: docker-build docker-push
 
 docker-tag-blue:
-	cd deploy/blue-app
-	kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
+	cd deploy/blue-app && kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
 
 docker-tag-green:
-	cd deploy/green-app
-	kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
+	cd deploy/green-app && kustomize edit set image blue-green=eu.gcr.io/${PROJECT_ID}/blue-green-app:${TAG}
 
 docker-tag-all: docker-tag-blue docker-tag-green
 

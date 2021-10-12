@@ -33,12 +33,6 @@ variable "zone" {
 data "google_client_config" "default" {}
 data "google_project" "project" {}
 
-resource "google_storage_bucket_iam_member" "registry" {
-  bucket = "eu.artifacts.${var.project_id}.appspot.com"
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-}
-
 resource "google_compute_network" "vpc" {
   name                    = "${var.project_id}-vpc"
   auto_create_subnetworks = "false"
@@ -75,26 +69,15 @@ resource "google_compute_address" "regional_lb_ip" {
   region = var.region
 }
 
-# resource "kubernetes_namespace" "nginx" {
-#   metadata {
-#     name = "nginx"
-#   }
-# }
+resource "google_container_registry" "registry" {
+  location = "EU"
+}
 
-# resource "helm_release" "nginx" {
-#   name       = "nginx"
-#   repository = "https://kubernetes.github.io/ingress-nginx"
-#   chart      = "ingress-nginx"
-#   version    = "4.0.5"
-#   namespace  = kubernetes_namespace.nginx.metadata[0].name
-
-#   set {
-#     name  = "controller.service.loadBalancerIP"
-#     value = google_compute_address.regional_lb_ip.address
-#   }
-
-#   depends_on = [google_container_cluster.gke]
-# }
+resource "google_storage_bucket_iam_member" "registry" {
+  bucket = google_container_registry.registry.id
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
 
 output "location" {
   value = "${var.region}-${var.zone}"
