@@ -13,7 +13,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: green-deploy
+                name: blue-deploy
                 port: 
                   number: 80
 

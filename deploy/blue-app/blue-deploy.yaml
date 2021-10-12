@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
         - name: blue-green-app
-          image: "eu.gcr.io/blue-green-project/blue-green-app:0.1.0"
+          image: "blue-green-app:0.1.0"
           imagePullPolicy: IfNotPresent
           env:
             - name: DEPLOYMENT
